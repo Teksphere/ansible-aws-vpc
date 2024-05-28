@@ -27,7 +27,7 @@
     - name: Create Sec Grp for bastion host
       ec2_group:
         name: Bastion-host-sg
-        description: Allow port 22 from everywhere and all port withing sg
+        description: Allow port 22 from everywhere and all port within sg
         region: "{{region}}"
         vpc_id: "{{vpcid}}"
         rules:
@@ -38,17 +38,16 @@
       register: BastionSG_out
 
     - name: Creating Bastion Host
-      ec2_instance:
+      ec2:
         key_name: vprofile-key
         region: "{{region}}"
         instance_type: t2.micro
-        image_id: "ami-0647086318eb3b918"
-        name: "BastionHost"
+        image: "{{ bastion_ami }}"
         wait: yes
         wait_timeout: 300
         instance_tags:
           Name: "Bastion_host"
-          project: Vprofile
+          Project: Vprofile
           Owner: DevOps Team
         exact_count: 1
         count_tag:
@@ -58,4 +57,3 @@
         group_id: "{{BastionSG_out.group_id}}"
         vpc_subnet_id: "{{pubsub1id}}"
       register: bastionHost_out
-

@@ -23,6 +23,26 @@
         mode: '0600'
       when: vprokey_out.changed
 
+    - name: Ensure correct permissions on loginkey_vpro.pem
+      file:
+        path: "./loginkey_vpro.pem"
+        mode: '0600'
+        owner: "{{ ansible_user_id }}"
+        group: "{{ ansible_user_gid }}"
+
+    - name: Copy login key to provision_stack directory
+      copy:
+        src: "./loginkey_vpro.pem"
+        dest: provision-stack/loginkey_vpro.pem
+        mode: '0600'
+
+    - name: Ensure correct permissions on copied loginkey_vpro.pem
+      file:
+        path: "provision-stack/loginkey_vpro.pem"
+        mode: '0600'
+        owner: "{{ ansible_user_id }}"
+        group: "{{ ansible_user_gid }}"
+
     - name: Create Security Group for Load Balancer
       amazon.aws.ec2_security_group:
         name: vproELB-sg

@@ -3,7 +3,7 @@ vpc_name: "Vprofile-vpc"
 # VPC Range
 vpcCidr: '172.20.0.0/16'
 
-#Subnets Range
+# Subnets Range
 PubSub1Cidr: 172.20.1.0/24
 PubSub2Cidr: 172.20.2.0/24
 PubSub3Cidr: 172.20.3.0/24
@@ -22,5 +22,5 @@ zone3: us-east-2c
 state: present
 
 # Bastion Vars
-bastion_ami: ami-0647086318eb3b918
+bastion_ami: ami-03657b56516ab7912
 MYIP: 102.67.3.51/32

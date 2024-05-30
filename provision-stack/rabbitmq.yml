@@ -2,25 +2,15 @@
   hosts: rmqsrvgrp
   gather_facts: no
   tasks:
-    - name: Add RabbitMQ signing key
-      apt_key:
-        url: https://www.rabbitmq.com/rabbitmq-release-signing-key.asc
+    - name: Install Erlang Repository Package
+      apt:
+        deb: https://packages.erlang-solutions.com/erlang-solutions_1.0_all.deb
         state: present
       tags:
         - package
 
-    - name: Add RabbitMQ repository
-      apt_repository:
-        repo: 'deb https://dl.cloudsmith.io/public/rabbitmq/rabbitmq-server/deb/ubuntu bionic main'
-        state: present
-        filename: 'rabbitmq'
-      tags:
-        - package
-
-    - name: Add Erlang Solutions signing key
-      apt_key:
-        url: https://packages.erlang-solutions.com/ubuntu/erlang_solutions.asc
-        state: present
+    - name: Add Erlang Solutions public key to /etc/apt/trusted.gpg.d/
+      command: wget -qO - https://packages.erlang-solutions.com/ubuntu/erlang_solutions.asc | apt-key add -
       tags:
         - package
 
@@ -32,17 +22,25 @@
       tags:
         - package
 
-    - name: Update apt cache
+    - name: Install Erlang
       apt:
+        name: erlang
         update_cache: yes
+        cache_valid_time: 86400
+        state: present
       tags:
         - package
 
-    - name: Install Erlang
-      apt:
-        name: esl-erlang
+    - name: Add RabbitMQ public key to /etc/apt/trusted.gpg.d/
+      command: wget -qO - https://packagecloud.io/rabbitmq/rabbitmq-server/gpgkey | apt-key add -
+      tags:
+        - package
+
+    - name: Add RabbitMQ repository
+      apt_repository:
+        repo: 'deb https://packagecloud.io/rabbitmq/rabbitmq-server/ubuntu/ bionic main'
         state: present
-        update_cache: yes
+        filename: 'rabbitmq-server'
       tags:
         - package
 

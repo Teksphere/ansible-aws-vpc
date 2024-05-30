@@ -1,4 +1,3 @@
----
 - name: Install & Setup RabbitMQ with user
   hosts: rmqsrvgrp
   gather_facts: no
@@ -6,13 +5,22 @@
     - name: Install Erlang Repository Package
       apt:
         deb: https://packages.erlang-solutions.com/erlang-solutions_1.0_all.deb
+        state: present
       tags:
         - package
 
-    - name: Add an Erlang Solution public Key
+    - name: Add Erlang Solutions public key
       apt_key:
         url: https://packages.erlang-solutions.com/ubuntu/erlang_solutions.asc
         state: present
+      tags:
+        - package
+
+    - name: Add Erlang Solutions repository
+      apt_repository:
+        repo: 'deb https://packages.erlang-solutions.com/ubuntu bionic contrib'
+        state: present
+        filename: 'erlang-solutions'
       tags:
         - package
 
@@ -25,20 +33,22 @@
       tags:
         - package
 
-    - name: Add an Apt signing key, uses whichever key is at the URL
+    - name: Add RabbitMQ signing key
       apt_key:
-        url: https://github.com/rabbitmq/signing-keys/releases/download/2.0/rabbitmq-release-signing-key.asc
+        url: https://packagecloud.io/rabbitmq/rabbitmq-server/gpgkey
         state: present
       tags:
         - package
 
-    - apt_repository:
-        repo: deb https://dl.bintray.com/rabbitmq/debian bionic erlang
+    - name: Add RabbitMQ repository
+      apt_repository:
+        repo: 'deb https://packagecloud.io/rabbitmq/rabbitmq-server/ubuntu/ bionic main'
         state: present
+        filename: 'rabbitmq-server'
       tags:
         - package
 
-    - name: Install Rabbit MQ
+    - name: Install RabbitMQ
       apt:
         name: rabbitmq-server
         state: present
@@ -46,8 +56,7 @@
       tags:
         - package
 
-
-    - name: Start & Enable RMQ
+    - name: Start & Enable RabbitMQ
       service:
         name: rabbitmq-server
         state: started
@@ -55,18 +64,18 @@
       tags:
         - svc
 
-    - name: Config setup
+    - name: Configure RabbitMQ
       copy:
         content: |
           [{rabbit, [{loopback_users, []}]}].
         dest: /etc/rabbitmq/rabbitmq.config
       notify:
-        - Restart RMQ
+        - Restart RabbitMQ
       tags:
         - conf
 
-
-    - rabbitmq_user:
+    - name: Create RabbitMQ user
+      rabbitmq_user:
         user: test
         password: test
         configure_priv: .*
@@ -75,22 +84,21 @@
         tags: administrator
         state: present
       notify:
-        - Restart RMQ
+        - Restart RabbitMQ
       tags:
         - conf
 
-
-    - name: Enables the rabbitmq_management plugin
+    - name: Enable the rabbitmq_management plugin
       rabbitmq_plugin:
         names: rabbitmq_management
         state: enabled
       notify:
-        - Restart RMQ
+        - Restart RabbitMQ
       tags:
         - package
 
   handlers:
-    - name: Restart RMQ
+    - name: Restart RabbitMQ
       service:
         name: rabbitmq-server
         state: restarted
